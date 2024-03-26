@@ -5,6 +5,7 @@ let
     sha256 = "1hs4rfylv0f1sbyhs1hf4f7jsq4np498fbcs5xjlmrkwhx4lpgmc";
   }) {config = {allowUnfree = true;};};
 in 
+#testcomment
 { pkgs, ... }: {
   home.username = "unei";
   home.homeDirectory = "/home/unei";
@@ -26,6 +27,8 @@ in
     nil # nix lsp
     python3Full # Needed for PlatformIO in vscode
     virtualenv # Needed for PlatformIO? -> probably both unnecessary since I use PlatformIO on cli for Marlin
+    xsel # needed for hx to interact with the x11 clipboard
+    xclip
 
     #Sysadmin stuff
     man-pages
@@ -137,6 +140,11 @@ in
         abort_merge: Some(( code: Char('M'), modifiers: ( bits: 1,),)),
       )
       ''; 
+  };
+
+  programs.zellij = {
+    enable = true;
+    enableZshIntegration = true; 
   };
 
   home.sessionVariables = {

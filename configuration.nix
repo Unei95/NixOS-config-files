@@ -22,7 +22,10 @@ in
   ];
 
   # Bootloader.
-  boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot = {
+    enable = true;
+    consoleMode = "2";
+  };
   boot.loader.efi.canTouchEfiVariables = true;
   boot.tmp.cleanOnBoot = true;
 
@@ -40,6 +43,10 @@ in
   };
 
   systemd.sleep.extraConfig = "HibernateDelaySec=1h";
+
+  fonts.fontconfig.defaultFonts.monospace = [
+    "Comic Code"
+  ];
 
   # Enable networking
   networking.networkmanager.enable = true;
@@ -167,7 +174,7 @@ in
   environment.shellAliases = {
     nixconf = "cd /etc/nixos && sudo -E hx /etc/nixos/configuration.nix"; # -E needed to keep clipboard intact
     nixrebuild = "sudo nixos-rebuild switch";
-    ns = "nix-shell";
+    ns = "nix-shell --run zsh";
     igrep = "grep -i";
   };
 
