@@ -13,6 +13,8 @@
     "*.tera"= "html";
   };
 
+  terminal.integrated.defaultProfile.linux = "zsh";
+
   vim.leader = "<space>";
   vim.easymotion = true;
   vim.normalModeKeyBindingsNonRecursive = [
