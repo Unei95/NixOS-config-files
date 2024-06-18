@@ -46,7 +46,7 @@ in
   # /etc/shells also contains multiple zsh entries
   programs.zsh = {
     enable = true;
-    enableAutosuggestions = true;
+    autosuggestion.enable = true;
 
     oh-my-zsh = {
       enable = true;

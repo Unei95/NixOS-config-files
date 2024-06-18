@@ -28,6 +28,7 @@ in
   };
   boot.loader.efi.canTouchEfiVariables = true;
   boot.tmp.cleanOnBoot = true;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   networking.hostName = "XPS-9530"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -39,7 +40,7 @@ in
   # logind
   services.logind = {
     lidSwitchExternalPower = "suspend";
-    lidSwitch = "suspend-then-hibernate";
+    lidSwitch = "hibernate";
   };
 
   systemd.sleep.extraConfig = "HibernateDelaySec=1h";
@@ -71,21 +72,37 @@ in
 
   # X11
   services.xserver.enable = true;
+
   services.xserver.desktopManager.gnome.enable = true;
+#  services.xserver.desktopManager.plasma5.enable = true;
+  services.displayManager.defaultSession = "gnome";
   services.xserver.displayManager = {
-    defaultSession = "gnome";
+    #lightdm.enable = true;
     gdm = {
       enable = true;
-      wayland = false;
+      wayland = true;
     };
   };
 
-  # Configure keymap in X11
-  services.xserver = {
-    layout = "us";
-    xkbVariant = "intl";
+  programs.hyprland = {
+  	enable = true;
   };
 
+  location = {
+    latitude = 50.501985;
+    longitude = 9.123418;
+  };
+  services.redshift = {
+    enable = true;
+    temperature.night = 2000;
+    brightness.night = "0.7";
+  };
+
+  # Configure keymap in X11
+  services.xserver.xkb = {
+    layout = "us";
+    variant = "intl";
+  };
   # Configure console keymap
   console.keyMap = "us-acentos";
 
@@ -143,7 +160,20 @@ in
     discord
     prismlauncher
     xournalpp
+    signal-desktop
 
+    # hyprland
+    wofi
+    dunst
+    libsForQt5.dolphin
+
+#    # Additional stuff for KDE Plasma 
+#    ## bluetooth configuration
+#    bluez
+#    libsForQt5.bluez-qt
+#    libsForQt5.bluedevil 
+#    
+#    glib-networking
     # Desktop stuffs
     gnomeExtensions.clipboard-indicator 
 
@@ -158,6 +188,7 @@ in
 
     # System stuffs
     powertop
+    unzip
 
     # still needed for nix-shell setup for jobarena
     docker-compose
@@ -262,48 +293,48 @@ in
     driSupport32Bit = true;
   };
 
-#  # Load nvidia driver for Xorg and Wayland
-#  services.xserver.videoDrivers = ["nvidia"];
-#  hardware.nvidia = {
-#
-#    # Modesetting is required.
-#    modesetting.enable = true;
-#
-#    # Enable power management (do not disable this unless you have a reason to).
-#    # Likely to cause problems on laptops and with screen tearing if disabled.
-#    powerManagement = {
-#      enable = true;
-#      finegrained = true;
-#    };
-#
-#    # Use the NVidia open source kernel module (not to be confused with the
-#    # independent third-party "nouveau" open source driver).
-#    # Support is limited to the Turing and later architectures. Full list of 
-#    # supported GPUs is at: 
-#    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
-#    # Only available from driver 515.43.04+
-#    # Do not disable this unless your GPU is unsupported or if you have a good reason to.
-#    # open = true; # the graphics card on my XPS-9350 seems not to be compatible with the open source kernel as of 08.09.2023
-#
-#    # Enable the Nvidia settings menu,
-#    # accessible via `nvidia-settings`.
-#    # nvidiaSettings = true;
-#
-#    # Optionally, you may need to select the appropriate driver version for your specific GPU.
-#    package = config.boot.kernelPackages.nvidiaPackages.stable;
-#
-#    prime = {
-#      #sync.enable = true;
-#      offload = {
-#        enable = true;
-#        enableOffloadCmd = true;
-#      };
-#
-#      # Make sure to use the correct Bus ID values for your system!
-#      intelBusId = "PCI:0:2:0";
-#      nvidiaBusId = "PCI:1:0:0";
-#    };
-#  };
+# Load nvidia driver for Xorg and Wayland
+services.xserver.videoDrivers = ["nvidia"];
+hardware.nvidia = {
+
+  # Modesetting is required.
+  modesetting.enable = true;
+
+  # Enable power management (do not disable this unless you have a reason to).
+  # Likely to cause problems on laptops and with screen tearing if disabled.
+  powerManagement = {
+    enable = true;
+    finegrained = true;
+  };
+
+  # Use the NVidia open source kernel module (not to be confused with the
+  # independent third-party "nouveau" open source driver).
+  # Support is limited to the Turing and later architectures. Full list of 
+  # supported GPUs is at: 
+  # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
+  # Only available from driver 515.43.04+
+  # Do not disable this unless your GPU is unsupported or if you have a good reason to.
+  # open = true; # the graphics card on my XPS-9350 seems not to be compatible with the open source kernel as of 08.09.2023
+
+  # Enable the Nvidia settings menu,
+  # accessible via `nvidia-settings`.
+  # nvidiaSettings = true;
+
+  # Optionally, you may need to select the appropriate driver version for your specific GPU.
+  package = config.boot.kernelPackages.nvidiaPackages.stable;
+
+  prime = {
+    #sync.enable = true;
+    offload = {
+      enable = true;
+      enableOffloadCmd = true;
+    };
+
+    # Make sure to use the correct Bus ID values for your system!
+    intelBusId = "PCI:0:2:0";
+    nvidiaBusId = "PCI:1:0:0";
+  };
+};
 
   programs.steam = {
     enable = true;
