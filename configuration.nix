@@ -40,10 +40,8 @@ in
   # logind
   services.logind = {
     lidSwitchExternalPower = "suspend";
-    lidSwitch = "hibernate";
+    lidSwitch = "suspend";
   };
-
-  systemd.sleep.extraConfig = "HibernateDelaySec=1h";
 
   fonts.fontconfig.defaultFonts.monospace = [
     "Comic Code"
@@ -73,30 +71,19 @@ in
   # X11
   services.xserver.enable = true;
 
+#  services.displayManager.sddm.enable = true;
+#  services.desktopManager.plasma6.enable = true;
+
   services.xserver.desktopManager.gnome.enable = true;
-#  services.xserver.desktopManager.plasma5.enable = true;
   services.displayManager.defaultSession = "gnome";
   services.xserver.displayManager = {
-    #lightdm.enable = true;
     gdm = {
       enable = true;
       wayland = true;
     };
   };
 
-  programs.hyprland = {
-  	enable = true;
-  };
-
-  location = {
-    latitude = 50.501985;
-    longitude = 9.123418;
-  };
-  services.redshift = {
-    enable = true;
-    temperature.night = 2000;
-    brightness.night = "0.7";
-  };
+  programs.xwayland.enable = true;
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -130,7 +117,7 @@ in
   users.users.unei = {
     isNormalUser = true;
     description = "unei";
-    extraGroups = [ "networkmanager" "wheel" "dialout" "docker"];
+    extraGroups = [ "networkmanager" "wheel" "dialout" ];
     shell = pkgs.zsh;
   };
   programs.zsh.enable = true;
@@ -167,20 +154,10 @@ in
     dunst
     libsForQt5.dolphin
 
-#    # Additional stuff for KDE Plasma 
-#    ## bluetooth configuration
-#    bluez
-#    libsForQt5.bluez-qt
-#    libsForQt5.bluedevil 
-#    
-#    glib-networking
     # Desktop stuffs
     gnomeExtensions.clipboard-indicator 
 
     # wine stuff (mainly for lutris)
-    # wine
-    # wineWowPackages.stable
-    wineWowPackages.unstableFull
     winetricks
 
     # Gaming
@@ -190,16 +167,9 @@ in
     powertop
     unzip
 
-    # still needed for nix-shell setup for jobarena
-    docker-compose
-
     # Allianz AVC
     citrix_workspace
   ];
-
-  # environment.variables = {
-  #   EDITOR = "hx";
-  # };
 
   # nixOS specific Shell aliases
   environment.shellAliases = {
@@ -209,14 +179,6 @@ in
     igrep = "grep -i";
   };
 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
   powerManagement.powertop.enable = true;
 
   nix.extraOptions = ''
@@ -224,23 +186,6 @@ in
   '';
 
   # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
-  services.syncthing = {
-    enable = true;
-    user = "unei";
-    dataDir = "/home/unei/syncthing";
-    overrideFolders = false;
-    overrideDevices = false;
-  };
 
   # Postgresql stuff
   services.postgresql = {
@@ -259,24 +204,6 @@ in
       local all       all     trust
     '';
   };
-
-#  services.pgadmin = {
-#    enable = true; 
-#    initialEmail = "mattis.sievers@pm.me";
-#    initialPasswordFile = "/home/unei/.pgadmin_pw";
-#  };
-
-  # VIRTUALIZATION
-  virtualisation = {
-    docker = {
-      enable = true;
-      rootless = {
-        enable = true;
-        setSocketVariable = true;
-      };
-      
-    };
-  }; 
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
