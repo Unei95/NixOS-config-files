@@ -37,12 +37,6 @@ in
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
-  # logind
-  services.logind = {
-    lidSwitchExternalPower = "suspend";
-    lidSwitch = "suspend";
-  };
-
   fonts.fontconfig.defaultFonts.monospace = [
     "Comic Code"
   ];
@@ -79,7 +73,6 @@ in
   services.xserver.displayManager = {
     gdm = {
       enable = true;
-      wayland = true;
     };
   };
 
@@ -92,9 +85,6 @@ in
   };
   # Configure console keymap
   console.keyMap = "us-acentos";
-
-  # Enable CUPS to print documents.
-  services.printing.enable = true;
 
   # Enable sound with pipewire.
   sound.enable = true;
@@ -149,15 +139,12 @@ in
     xournalpp
     signal-desktop
 
-    # hyprland
-    wofi
-    dunst
-    libsForQt5.dolphin
-
     # Desktop stuffs
     gnomeExtensions.clipboard-indicator 
 
     # wine stuff (mainly for lutris)
+    wine
+    wineWowPackages.full
     winetricks
 
     # Gaming
@@ -205,6 +192,8 @@ in
     '';
   };
 
+  services.teamviewer.enable = true;
+
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It‘s perfectly fine and recommended to leave
@@ -213,55 +202,48 @@ in
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "23.05"; # Did you read the comment?
 
-  # Enable OpenGL
-  hardware.opengl = {
-    enable = true;
-    driSupport = true;
-    driSupport32Bit = true;
-  };
+  # Load nvidia driver for Xorg and Wayland
+  services.xserver.videoDrivers = [ "nvidia" "modesetting" ];
+  hardware.nvidia = {
 
-# Load nvidia driver for Xorg and Wayland
-services.xserver.videoDrivers = ["nvidia"];
-hardware.nvidia = {
+    # Modesetting is required.
+    modesetting.enable = true;
 
-  # Modesetting is required.
-  modesetting.enable = true;
+    # Enable power management (do not disable this unless you have a reason to).
+    # Likely to cause problems on laptops and with screen tearing if disabled.
+    # powerManagement = {
+    #   enable = true;
+    #   finegrained = true;
+    # };
 
-  # Enable power management (do not disable this unless you have a reason to).
-  # Likely to cause problems on laptops and with screen tearing if disabled.
-  powerManagement = {
-    enable = true;
-    finegrained = true;
-  };
+    # Use the NVidia open source kernel module (not to be confused with the
+    # independent third-party "nouveau" open source driver).
+    # Support is limited to the Turing and later architectures. Full list of 
+    # supported GPUs is at: 
+    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
+    # Only available from driver 515.43.04+
+    # Do not disable this unless your GPU is unsupported or if you have a good reason to.
+    #open = true; # the graphics card on my XPS-9350 seems not to be compatible with the open source kernel as of 08.09.2023
 
-  # Use the NVidia open source kernel module (not to be confused with the
-  # independent third-party "nouveau" open source driver).
-  # Support is limited to the Turing and later architectures. Full list of 
-  # supported GPUs is at: 
-  # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
-  # Only available from driver 515.43.04+
-  # Do not disable this unless your GPU is unsupported or if you have a good reason to.
-  # open = true; # the graphics card on my XPS-9350 seems not to be compatible with the open source kernel as of 08.09.2023
+    # Enable the Nvidia settings menu,
+    # accessible via `nvidia-settings`.
+    nvidiaSettings = true;
 
-  # Enable the Nvidia settings menu,
-  # accessible via `nvidia-settings`.
-  # nvidiaSettings = true;
+    # Optionally, you may need to select the appropriate driver version for your specific GPU.
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
 
-  # Optionally, you may need to select the appropriate driver version for your specific GPU.
-  package = config.boot.kernelPackages.nvidiaPackages.stable;
+    prime = {
+      sync.enable = true;
+      #offload = {
+      #  enable = true;
+      #  enableOffloadCmd = true;
+      #};
 
-  prime = {
-    #sync.enable = true;
-    offload = {
-      enable = true;
-      enableOffloadCmd = true;
+      # Make sure to use the correct Bus ID values for your system!
+      intelBusId = "PCI:0:2:0";
+      nvidiaBusId = "PCI:1:0:0";
     };
-
-    # Make sure to use the correct Bus ID values for your system!
-    intelBusId = "PCI:0:2:0";
-    nvidiaBusId = "PCI:1:0:0";
   };
-};
 
   programs.steam = {
     enable = true;
