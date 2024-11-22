@@ -1,8 +1,8 @@
 let
   # use a specific version of unstable to use features like github copilot in vscode
   unstable = import (builtins.fetchTarball{
-    url = "https://github.com/NixOS/nixpkgs/tarball/c75037bbf9093a2acb617804ee46320d6d1fea5a";
-    sha256 = "1hs4rfylv0f1sbyhs1hf4f7jsq4np498fbcs5xjlmrkwhx4lpgmc";
+    url = "https://github.com/NixOS/nixpkgs/tarball/ad416d066ca1222956472ab7d0555a6946746a80";
+    sha256 = "0b9x5sghija7gy4lzf6l9s2kchdwj0zxs37ndlms2r8z1g3gwa7v";
   }) {config = {allowUnfree = true;};};
 in 
 #testcomment
@@ -19,6 +19,7 @@ in
     avrdude
     ripgrep
     alacritty
+    gh
  
     # stuff for zsh
     zoxide # also referenced in zsh config
@@ -114,6 +115,7 @@ in
       vscodevim.vim
       github.copilot
       github.copilot-chat
+      github.vscode-github-actions
       jnoortheen.nix-ide
       rust-lang.rust-analyzer
       tamasfe.even-better-toml
@@ -165,5 +167,8 @@ in
     # needed, since programs.helix.defaultEditor = true;
     # is not available in home-manager 23.05
     EDITOR = "nvim";
+
+    # needed for rust-analyzer
+    RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
   };
 }

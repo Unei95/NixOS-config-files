@@ -1,6 +1,4 @@
 {
-  files.autoSave = "afterDelay";
-
   zenMode = {
     showTabs = "single";
     hideLineNumbers = false;
