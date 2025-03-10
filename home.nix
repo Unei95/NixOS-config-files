@@ -94,6 +94,7 @@ in
 
   programs.helix = {
     enable = true;
+    defaultEditor = true;
     package = unstable.helix;
     settings = {
       theme = "gruvbox_dark_hard";
@@ -105,6 +106,10 @@ in
 
       editor.whitespace = {
         render = "all";
+      };
+
+      keys.insert = {
+        "C-[" = "normal_mode";
       };
     };
   };
@@ -166,10 +171,6 @@ in
   };
 
   home.sessionVariables = {
-    # needed, since programs.helix.defaultEditor = true;
-    # is not available in home-manager 23.05
-    EDITOR = "nvim";
-
     # needed for rust-analyzer
     RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
   };
