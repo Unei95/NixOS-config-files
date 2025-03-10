@@ -4,8 +4,8 @@
 
 let
   unstable = import (builtins.fetchTarball{
-    url = "https://github.com/NixOS/nixpkgs/tarball/c75037bbf9093a2acb617804ee46320d6d1fea5a";
-    sha256 = "1hs4rfylv0f1sbyhs1hf4f7jsq4np498fbcs5xjlmrkwhx4lpgmc";
+    url = "https://github.com/NixOS/nixpkgs/tarball/36fd87baa9083f34f7f5027900b62ee6d09b1f2f";
+    sha256 = "0b56iwbr9cwakzzs4n9k6nacgzk3j81vx2spc8m6w6vvv2qdw7js";
   }) { 
         config = {
           allowUnfree = true;
@@ -63,6 +63,8 @@ in
   # somehow nsncd was not enabled
   services.nscd.enableNsncd = true;
 
+  services.input-remapper.enable = true;
+
   # X11
   services.xserver.enable = true;
 
@@ -88,7 +90,6 @@ in
   console.keyMap = "us-acentos";
 
   # Enable sound with pipewire.
-  sound.enable = true;
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -140,6 +141,7 @@ in
     xournalpp
     signal-desktop
     calibre
+    slack
 
     # Desktop stuffs
     gnomeExtensions.clipboard-indicator 
@@ -185,6 +187,7 @@ in
   hardware.opengl.enable = true;
   services.xserver.videoDrivers = [ "nvidia" "modesetting" ];
   hardware.nvidia = {
+    open = true;
 
     # Modesetting is required.
     modesetting.enable = true;
@@ -210,7 +213,7 @@ in
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.latest;
+    # package = config.boot.kernelPackages.nvidiaPackages.latest;
 
     prime = {
       sync.enable = true;

@@ -1,8 +1,8 @@
 let
   # use a specific version of unstable to use features like github copilot in vscode
   unstable = import (builtins.fetchTarball{
-    url = "https://github.com/NixOS/nixpkgs/tarball/ad416d066ca1222956472ab7d0555a6946746a80";
-    sha256 = "0b9x5sghija7gy4lzf6l9s2kchdwj0zxs37ndlms2r8z1g3gwa7v";
+    url = "https://github.com/NixOS/nixpkgs/tarball/36fd87baa9083f34f7f5027900b62ee6d09b1f2f";
+    sha256 = "0b56iwbr9cwakzzs4n9k6nacgzk3j81vx2spc8m6w6vvv2qdw7js";
   }) {config = {allowUnfree = true;};};
 in 
 #testcomment
@@ -36,7 +36,7 @@ in
     man-pages
   ];
 
-  home.stateVersion = "23.05";
+  home.stateVersion = "24.11";
   programs.home-manager.enable = true; # tbh I don't know if I need this one.
 
   # if used in a nixOS environment you have to set the following options:
@@ -94,6 +94,7 @@ in
 
   programs.helix = {
     enable = true;
+    package = unstable.helix;
     settings = {
       theme = "gruvbox_dark_hard";
 
@@ -120,6 +121,7 @@ in
       rust-lang.rust-analyzer
       tamasfe.even-better-toml
       bradlc.vscode-tailwindcss
+      vadimcn.vscode-lldb
     ];
 
     keybindings = [
