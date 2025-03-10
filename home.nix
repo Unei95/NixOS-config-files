@@ -146,6 +146,11 @@ in
     userEmail = "mattis.sievers@pm.me";
   };
 
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
   programs.gitui = {
     enable = true;
     # taken from https://github.com/extrawurst/gitui/blob/master/vim_style_key_config.ron

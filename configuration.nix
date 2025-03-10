@@ -184,7 +184,7 @@ in
   system.stateVersion = "23.05"; # Did you read the comment?
 
   # Load nvidia driver for Xorg and Wayland
-  hardware.opengl.enable = true;
+  hardware.graphics.enable = true;
   services.xserver.videoDrivers = [ "nvidia" "modesetting" ];
   hardware.nvidia = {
     open = true;
