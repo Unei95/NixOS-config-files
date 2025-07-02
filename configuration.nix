@@ -6,12 +6,18 @@ let
   unstable = import (builtins.fetchTarball{
     url = "https://github.com/NixOS/nixpkgs/tarball/2631b0b7abcea6e640ce31cd78ea58910d31e650";
     sha256 = "0crx0vfmvxxzj8viqpky4k8k7f744dsqnn1ki5qj270bx2w9ssid";
-  }) { 
-        config = {
-          allowUnfree = true;
-          permittedInsecurePackages = ["electron-25.9.0"]; #Needed since obsidian lags behind in EOL electron releases
-        };
-      };
+  })
+  { 
+    config = {
+      allowUnfree = true;
+      permittedInsecurePackages = ["electron-25.9.0"]; #Needed since obsidian lags behind in EOL electron releases
+    };
+  };
+
+  hotfix = import (builtins.fetchTarball{
+    url = "https://github.com/NixOS/nixpkgs/tarball/12319d98674cf9426d0eababe66e75ce4102ebed";
+    sha256 = "11cvs1m86940gm55f6x0k24mya2zyfgcp7hdhqjbcl871q0wsgqd";
+  }){};
 in 
 { config, pkgs, ... }:
 
@@ -89,9 +95,13 @@ in
   # Configure console keymap
   console.keyMap = "us-acentos";
 
+  security = {
+    rtkit.enable = true;
+    sudo.package = hotfix.sudo;
+  };
+
   # Enable sound with pipewire.
   hardware.pulseaudio.enable = false;
-  security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
     alsa.enable = true;
