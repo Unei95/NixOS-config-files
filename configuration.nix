@@ -4,8 +4,8 @@
 
 let
   unstable = import (builtins.fetchTarball{
-    url = "https://github.com/NixOS/nixpkgs/tarball/36fd87baa9083f34f7f5027900b62ee6d09b1f2f";
-    sha256 = "0b56iwbr9cwakzzs4n9k6nacgzk3j81vx2spc8m6w6vvv2qdw7js";
+    url = "https://github.com/NixOS/nixpkgs/tarball/2631b0b7abcea6e640ce31cd78ea58910d31e650";
+    sha256 = "0crx0vfmvxxzj8viqpky4k8k7f744dsqnn1ki5qj270bx2w9ssid";
   }) { 
         config = {
           allowUnfree = true;
@@ -105,6 +105,7 @@ in
     #media-session.enable = true;
   };
 
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.unei = {
     isNormalUser = true;
@@ -113,6 +114,10 @@ in
     shell = pkgs.zsh;
   };
   programs.zsh.enable = true;
+
+  # Docker
+  virtualisation.docker.enable = true;
+  users.extraGroups.docker.members = [ "unei" ];
 
   # home manager config
   home-manager.useUserPackages = true; # recommended in the manual
@@ -142,6 +147,8 @@ in
     signal-desktop
     calibre
     slack
+    dbeaver-bin
+    gimp
 
     # Desktop stuffs
     gnomeExtensions.clipboard-indicator 
@@ -152,7 +159,8 @@ in
     winetricks
 
     # Gaming
-    lutris 
+    lutris
+    beyond-all-reason
 
     # System stuffs
     powertop
@@ -185,7 +193,7 @@ in
 
   # Load nvidia driver for Xorg and Wayland
   hardware.graphics.enable = true;
-  services.xserver.videoDrivers = [ "nvidia" "modesetting" ];
+  services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia = {
     open = true;
 
@@ -206,14 +214,13 @@ in
     # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
     # Only available from driver 515.43.04+
     # Do not disable this unless your GPU is unsupported or if you have a good reason to.
-    #open = true; # the graphics card on my XPS-9350 seems not to be compatible with the open source kernel as of 08.09.2023
 
     # Enable the Nvidia settings menu,
     # accessible via `nvidia-settings`.
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    # package = config.boot.kernelPackages.nvidiaPackages.latest;
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
 
     prime = {
       sync.enable = true;

@@ -1,8 +1,8 @@
 let
   # use a specific version of unstable to use features like github copilot in vscode
   unstable = import (builtins.fetchTarball{
-    url = "https://github.com/NixOS/nixpkgs/tarball/36fd87baa9083f34f7f5027900b62ee6d09b1f2f";
-    sha256 = "0b56iwbr9cwakzzs4n9k6nacgzk3j81vx2spc8m6w6vvv2qdw7js";
+    url = "https://github.com/NixOS/nixpkgs/tarball/2631b0b7abcea6e640ce31cd78ea58910d31e650";
+    sha256 = "0crx0vfmvxxzj8viqpky4k8k7f744dsqnn1ki5qj270bx2w9ssid";
   }) {config = {allowUnfree = true;};};
 in 
 #testcomment
@@ -82,7 +82,7 @@ in
 
 	    # The command builtin allows one to alias nnn to n, if desired, without
 	    # making an infinitely recursive alias
-	    command nnn "$@"
+	    command nnn -e "$@"
 
 	    [ ! -f "$NNN_TMPFILE" ] || {
 		. "$NNN_TMPFILE"
@@ -108,9 +108,20 @@ in
         render = "all";
       };
 
+      editor.lsp.display-inlay-hints = true;
+      editor.end-of-line-diagnostics = "hint";
+      editor.inline-diagnostics.cursor-line = "warning";
+
       keys.insert = {
         "C-[" = "normal_mode";
       };
+    };
+
+    languages = {
+      language = [{
+          name = "rust";
+          auto-format = false;
+      }];
     };
   };
 
