@@ -1,12 +1,4 @@
-let
-  # use a specific version of unstable to use features like github copilot in vscode
-  unstable = import (builtins.fetchTarball{
-    url = "https://github.com/NixOS/nixpkgs/tarball/2631b0b7abcea6e640ce31cd78ea58910d31e650";
-    sha256 = "0crx0vfmvxxzj8viqpky4k8k7f744dsqnn1ki5qj270bx2w9ssid";
-  }) {config = {allowUnfree = true;};};
-in 
-#testcomment
-{ pkgs, ... }: {
+{ pkgs, unstable, ... }: {
   home.username = "unei";
   home.homeDirectory = "/home/unei";
 

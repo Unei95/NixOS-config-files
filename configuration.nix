@@ -4,13 +4,13 @@
 
 let
   unstable = import (builtins.fetchTarball{
-    url = "https://github.com/NixOS/nixpkgs/tarball/2631b0b7abcea6e640ce31cd78ea58910d31e650";
-    sha256 = "0crx0vfmvxxzj8viqpky4k8k7f744dsqnn1ki5qj270bx2w9ssid";
+    url = "https://github.com/NixOS/nixpkgs/tarball/9b008d60392981ad674e04016d25619281550a9d";
+    sha256 = "1pxnwzrwcgasascapd6f0l8ricv6dgads3rgz2m45hyny80720cs";
   })
   { 
     config = {
       allowUnfree = true;
-      permittedInsecurePackages = ["electron-25.9.0"]; #Needed since obsidian lags behind in EOL electron releases
+      permittedInsecurePackages = ["electron-25.9.0" "libxml2-2.13.8"]; #Needed since obsidian lags behind in EOL electron releases
     };
   };
 
@@ -40,6 +40,8 @@ in
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
  
   services.resolved.enable = true;
+
+  hardware.bluetooth.enable = true;
 
   fonts.fontconfig.defaultFonts.monospace = [
     "Comic Code"
@@ -74,17 +76,17 @@ in
   # X11
   services.xserver.enable = true;
 
-#  services.displayManager.sddm.enable = true;
-#  services.desktopManager.plasma6.enable = true;
+ services.displayManager.sddm.enable = true;
+ services.desktopManager.plasma6.enable = true;
 
-  services.xserver.desktopManager.gnome.enable = true;
-  services.displayManager.defaultSession = "gnome";
-  services.xserver.displayManager = {
-    gdm = {
-      enable = true;
-    };
-  };
-
+  # services.xserver.desktopManager.gnome.enable = true;
+  services.displayManager.defaultSession = "plasmax11";
+  # services.xserver.displayManager = {
+  #   gdm = {
+  #     enable = true;
+  #   };
+  # };
+  # services.picom.enable = true;
   programs.xwayland.enable = true;
 
   # Configure keymap in X11
@@ -132,11 +134,11 @@ in
   # home manager config
   home-manager.useUserPackages = true; # recommended in the manual
   home-manager.useGlobalPkgs = true; # saves time and adds consistency
-  home-manager.users.unei = import ./home.nix;
+  home-manager.users.unei = import ./home.nix {inherit pkgs unstable;};
   environment.pathsToLink = [ "/share/zsh" ]; # recommended
  
   # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config = { allowUnfree = true; };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -161,7 +163,8 @@ in
     gimp
 
     # Desktop stuffs
-    gnomeExtensions.clipboard-indicator 
+    # gnomeExtensions.clipboard-indicator 
+    # xorg.libXrender
 
     # wine stuff (mainly for lutris)
     wine
@@ -177,7 +180,7 @@ in
     unzip
 
     # Allianz AVC
-    citrix_workspace
+    unstable.citrix_workspace
   ];
 
   environment.shellAliases = {
