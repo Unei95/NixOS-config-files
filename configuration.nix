@@ -145,6 +145,7 @@ in
   environment.systemPackages = with pkgs; [
     # Programs (which need .desktop entries)
     firefox
+    vivaldi
     chromium 
     unstable.obsidian
     qemu
@@ -163,8 +164,8 @@ in
     gimp
 
     # Desktop stuffs
-    # gnomeExtensions.clipboard-indicator 
-    # xorg.libXrender
+    google-cursor
+    xorg.libXrender
 
     # wine stuff (mainly for lutris)
     wine

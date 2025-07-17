@@ -10,7 +10,6 @@
     htop
     avrdude
     ripgrep
-    alacritty
     gh
  
     # stuff for zsh
@@ -30,6 +29,18 @@
 
   home.stateVersion = "24.11";
   programs.home-manager.enable = true; # tbh I don't know if I need this one.
+
+  programs.alacritty = {
+    enable = true;
+
+    settings = {
+      terminal.shell = {
+        program = "zellij";
+        args = ["-l" "welcome"];
+      };
+    };
+
+  };
 
   # if used in a nixOS environment you have to set the following options:
   # programs.zsh.enable = true;
@@ -175,7 +186,7 @@
 
   programs.zellij = {
     enable = true;
-    enableZshIntegration = true; 
+    # enableZshIntegration = true; 
   };
 
   home.sessionVariables = {
