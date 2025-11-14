@@ -4,51 +4,66 @@
 
 let
   unstable = import (builtins.fetchTarball{
-    url = "https://github.com/NixOS/nixpkgs/tarball/9b008d60392981ad674e04016d25619281550a9d";
-    sha256 = "1pxnwzrwcgasascapd6f0l8ricv6dgads3rgz2m45hyny80720cs";
+    url = "https://github.com/NixOS/nixpkgs/tarball/85dbfc7aaf52ecb755f87e577ddbe6dbbdbc1054";
+    sha256 = "1krzkmqdpv2w5hq9nvq4q91i0x7mhpn3fx32rg0p1yyq7zsj61w8";
   })
   { 
     config = {
       allowUnfree = true;
-      permittedInsecurePackages = ["electron-25.9.0" "libxml2-2.13.8"]; #Needed since obsidian lags behind in EOL electron releases
+      permittedInsecurePackages = [
+        "electron-25.9.0"
+        "libxml2-2.13.8"
+        "libsoup-2.74.3"
+      ];
     };
   };
 
-  hotfix = import (builtins.fetchTarball{
-    url = "https://github.com/NixOS/nixpkgs/tarball/12319d98674cf9426d0eababe66e75ce4102ebed";
-    sha256 = "11cvs1m86940gm55f6x0k24mya2zyfgcp7hdhqjbcl871q0wsgqd";
-  }){};
+  hosts = import ./hosts.nix ;
+  # openwebui = import ./open_webui.nix { inherit hosts; };
 in 
 { config, pkgs, ... }:
 
 {
   imports = [ 
-      /etc/nixos/hardware-configuration.nix # Include the results of the hardware scan.
-      <home-manager/nixos>
+    /etc/nixos/hardware-configuration.nix # Include the results of the hardware scan.
+    ./graphics_tablet.nix
+    <home-manager/nixos>
   ];
 
   # Bootloader.
-  boot.loader.systemd-boot = {
-    enable = true;
-    # needed because of high resolution display
-    consoleMode = "2";
-  };
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.tmp.cleanOnBoot = true;
+  boot = {
+    loader = {
+      systemd-boot = {
+        enable = true;
+        # needed because of high resolution display
+        consoleMode = "2";
+      };
+      efi.canTouchEfiVariables = true;
+    };
+    tmp.cleanOnBoot = true;
 
-  networking.hostName = "XPS-9530"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
- 
-  services.resolved.enable = true;
+    binfmt.emulatedSystems = [
+        "aarch64-linux"
+    ];
+  };
+
+  networking = {
+    hostName = hosts.hostName; # Define your hostname.
+    networkmanager.enable = true;
+
+    interfaces.${hosts.interface} = {
+      ipv4.addresses = [{
+      address = hosts.staticIp;
+      prefixLength = 24;
+    }];
+    };
+  };
 
   hardware.bluetooth.enable = true;
 
   fonts.fontconfig.defaultFonts.monospace = [
     "Comic Code"
   ];
-
-  # Enable networking
-  networking.networkmanager.enable = true;
 
   # Set your time zone.
   time.timeZone = "Europe/Berlin";
@@ -71,10 +86,13 @@ in
   # somehow nsncd was not enabled
   services.nscd.enableNsncd = true;
 
+  
+
   services.input-remapper.enable = true;
 
   # X11
   services.xserver.enable = true;
+
 
  services.displayManager.sddm.enable = true;
  services.desktopManager.plasma6.enable = true;
@@ -86,7 +104,6 @@ in
   #     enable = true;
   #   };
   # };
-  # services.picom.enable = true;
   programs.xwayland.enable = true;
 
   # Configure keymap in X11
@@ -99,7 +116,6 @@ in
 
   security = {
     rtkit.enable = true;
-    sudo.package = hotfix.sudo;
   };
 
   # Enable sound with pipewire.
@@ -162,6 +178,7 @@ in
     slack
     dbeaver-bin
     gimp
+    vial
 
     # Desktop stuffs
     google-cursor
@@ -184,6 +201,10 @@ in
     unstable.citrix_workspace
   ];
 
+  services.udev.extraRules = ''
+    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users", TAG+="uaccess", TAG+="udev-acl"
+    '';
+
   environment.shellAliases = {
     nixconf = "cd /etc/nixos && sudo -E hx /etc/nixos/configuration.nix"; # -E needed to keep clipboard intact
     nixrebuild = "sudo nixos-rebuild switch";
@@ -193,10 +214,24 @@ in
 
   powerManagement.powertop.enable = true;
 
-  nix.extraOptions = ''
-    experimental-features = nix-command flakes
-  '';
+  nix = {
+    distributedBuilds = true;
+    buildMachines = [
+      {
+        hostName = "smort.cute";
+        system = "aarch64-linux";
+        sshUser = "unei";
+        sshKey = "/root/.ssh/remotebuild";
+        supportedFeatures = [ "nixos-test" "big-parallel" "kvm" ];
+      }
+    ];
 
+    settings.builders-use-substitutes = true;
+
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
+  };
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It‘s perfectly fine and recommended to leave

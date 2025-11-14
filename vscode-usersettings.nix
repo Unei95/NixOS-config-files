@@ -11,6 +11,8 @@
     "*.tera"= "html";
   };
 
+  files.autoSave = "afterDelay";
+
   terminal.integrated.defaultProfile.linux = "zsh";
 
   vim.leader = "<space>";

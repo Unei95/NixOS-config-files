@@ -25,6 +25,7 @@
 
     #Sysadmin stuff
     man-pages
+    dig
   ];
 
   home.stateVersion = "24.11";
@@ -36,7 +37,6 @@
     settings = {
       terminal.shell = {
         program = "zellij";
-        args = ["-l" "welcome"];
       };
     };
 
@@ -130,7 +130,7 @@
 
   programs.vscode = {
     enable = true;
-    package = unstable.vscode;
+    package = unstable.vscode.fhs;
     extensions = with unstable.vscode-extensions; [
       vscodevim.vim
       github.copilot
@@ -186,7 +186,23 @@
 
   programs.zellij = {
     enable = true;
-    # enableZshIntegration = true; 
+    attachExistingSession = true;
+    settings = {
+      show_startup_tips = false;
+      # keybinds = {
+      #   normal = {
+      #     bind = {
+      #         _args = [ "Ctrl j" "Ctrl r" ];
+      #         Run = {
+      #           _args = [
+      #             "sudo" "nixos-rebuild" "switch"
+      #           ];
+      #         };
+      #         # TogglePaneEmbedOrFloating;
+      #       };
+      #   };
+      # };
+    };
   };
 
   home.sessionVariables = {
