@@ -4,15 +4,13 @@
 
 let
   unstable = import (builtins.fetchTarball{
-    url = "https://github.com/NixOS/nixpkgs/tarball/85dbfc7aaf52ecb755f87e577ddbe6dbbdbc1054";
-    sha256 = "1krzkmqdpv2w5hq9nvq4q91i0x7mhpn3fx32rg0p1yyq7zsj61w8";
+    url = "https://github.com/NixOS/nixpkgs/tarball/15f4ee454b1dce334612fa6843b3e05cf546efab";
+    sha256 = "17pr9kf46019gf9nkg7jsa0h81adwbkdjwlk0i57nycnhad3vph1";
   })
   { 
     config = {
       allowUnfree = true;
       permittedInsecurePackages = [
-        "electron-25.9.0"
-        "libxml2-2.13.8"
         "libsoup-2.74.3"
       ];
     };
@@ -21,7 +19,7 @@ let
   hosts = import ./hosts.nix ;
   # openwebui = import ./open_webui.nix { inherit hosts; };
 in 
-{ config, pkgs, ... }:
+{ lib, config, pkgs, ... }:
 
 {
   imports = [ 
@@ -40,12 +38,27 @@ in
       };
       efi.canTouchEfiVariables = true;
     };
+
+    initrd.kernelModules = [ "pinctrl_tigerlake" ];
     tmp.cleanOnBoot = true;
 
     binfmt.emulatedSystems = [
         "aarch64-linux"
     ];
   };
+
+  # compatability for framework12
+  # Fix TRRS headphones missing a mic
+  # https://github.com/torvalds/linux/commit/7b509910b3ad6d7aacead24c8744de10daf8715d
+  boot.extraModprobeConfig = lib.mkIf (lib.versionOlder config.boot.kernelPackages.kernel.version "6.13.0") ''
+    options snd-hda-intel model=dell-headset-multi
+  '';
+
+  # Needed for desktop environments to detect display orientation
+  hardware.sensor.iio.enable = lib.mkDefault true;
+
+  # Everything is updateable through fwupd
+  services.fwupd.enable = true;
 
   networking = {
     hostName = hosts.hostName; # Define your hostname.
@@ -86,7 +99,7 @@ in
   # somehow nsncd was not enabled
   services.nscd.enableNsncd = true;
 
-  
+  programs.ssh.startAgent = true;
 
   services.input-remapper.enable = true;
 
@@ -98,7 +111,7 @@ in
  services.desktopManager.plasma6.enable = true;
 
   # services.xserver.desktopManager.gnome.enable = true;
-  services.displayManager.defaultSession = "plasmax11";
+  # services.displayManager.defaultSession = "plasmax11";
   # services.xserver.displayManager = {
   #   gdm = {
   #     enable = true;
@@ -113,13 +126,15 @@ in
   };
   # Configure console keymap
   console.keyMap = "us-acentos";
+  console.font = "Comic Code";
 
+  services.flatpak.enable = true;
+  
   security = {
     rtkit.enable = true;
   };
 
   # Enable sound with pipewire.
-  hardware.pulseaudio.enable = false;
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -160,18 +175,11 @@ in
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     # Programs (which need .desktop entries)
-    firefox
-    vivaldi
+    # unstable.vivaldi
     chromium 
-    unstable.obsidian
-    qemu
-    prusa-slicer
-    freecad
-    libsForQt5.okular
-    keepass
-    protonvpn-gui
+    obsidian
+    kdePackages.okular
     discord
-    prismlauncher
     xournalpp
     signal-desktop
     calibre
@@ -179,11 +187,22 @@ in
     dbeaver-bin
     gimp
     vial
+    libreoffice
+    protonvpn-gui
+    proton-pass
+    unetbootin
+
+    # LSPs
+    bash-language-server
+
+    # programming/cli stuff not configurable via homemanager(yet, hopefully)
+    # unstable.github-copilot-cli
 
     # Desktop stuffs
     google-cursor
     xorg.libXrender
-
+    # maliit-keyboard # on-screen keyboard when running a wayland session
+    
     # wine stuff (mainly for lutris)
     wine
     wineWowPackages.full
@@ -191,14 +210,11 @@ in
 
     # Gaming
     lutris
-    beyond-all-reason
 
     # System stuffs
     powertop
     unzip
-
-    # Allianz AVC
-    unstable.citrix_workspace
+    toybox
   ];
 
   services.udev.extraRules = ''
@@ -206,7 +222,7 @@ in
     '';
 
   environment.shellAliases = {
-    nixconf = "cd /etc/nixos && sudo -E hx /etc/nixos/configuration.nix"; # -E needed to keep clipboard intact
+    nixconf = "hx /home/unei/projects/nixos-config-files"; # -E needed to keep clipboard intact
     nixrebuild = "sudo nixos-rebuild switch";
     ns = "nix-shell --run zsh";
     igrep = "grep -i";
@@ -240,48 +256,9 @@ in
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "23.05"; # Did you read the comment?
 
-  # Load nvidia driver for Xorg and Wayland
-  hardware.graphics.enable = true;
-  services.xserver.videoDrivers = [ "nvidia" ];
-  hardware.nvidia = {
-    open = true;
-
-    # Modesetting is required.
-    modesetting.enable = true;
-
-    # Enable power management (do not disable this unless you have a reason to).
-    # Likely to cause problems on laptops and with screen tearing if disabled.
-    # powerManagement = {
-    #   enable = true;
-    #   finegrained = true;
-    # };
-
-    # Use the NVidia open source kernel module (not to be confused with the
-    # independent third-party "nouveau" open source driver).
-    # Support is limited to the Turing and later architectures. Full list of 
-    # supported GPUs is at: 
-    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
-    # Only available from driver 515.43.04+
-    # Do not disable this unless your GPU is unsupported or if you have a good reason to.
-
-    # Enable the Nvidia settings menu,
-    # accessible via `nvidia-settings`.
-    nvidiaSettings = true;
-
-    # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
-
-    prime = {
-      sync.enable = true;
-      #offload = {
-      #  enable = true;
-      #  enableOffloadCmd = true;
-      #};
-
-      # Make sure to use the correct Bus ID values for your system!
-      intelBusId = "PCI:0:2:0";
-      nvidiaBusId = "PCI:1:0:0";
-    };
+  services.xserver.videoDrivers = [ "modesetting" ];
+  hardware.graphics = {
+    enable = true; 
   };
 
   programs.steam = {

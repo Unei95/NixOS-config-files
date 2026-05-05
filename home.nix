@@ -18,10 +18,10 @@
 
     # misc dependencies
     nil # nix lsp
-    python3Full # Needed for PlatformIO in vscode
-    virtualenv # Needed for PlatformIO? -> probably both unnecessary since I use PlatformIO on cli for Marlin
     xsel # needed for hx to interact with the x11 clipboard
     xclip
+
+    unstable.citrix_workspace
 
     #Sysadmin stuff
     man-pages
@@ -34,11 +34,11 @@
   programs.alacritty = {
     enable = true;
 
-    settings = {
-      terminal.shell = {
-        program = "zellij";
-      };
-    };
+    # settings = {
+    #   terminal.shell = {
+    #     program = "zellij attach -c";
+    #   };
+    # };
 
   };
 
@@ -61,7 +61,7 @@
       ];
     };
 
-    initExtra = ''
+    initContent = ''
 	n ()
 	{
 	    # Block nesting of nnn in subshells
@@ -98,7 +98,6 @@
   programs.helix = {
     enable = true;
     defaultEditor = true;
-    package = unstable.helix;
     settings = {
       theme = "gruvbox_dark_hard";
 
@@ -114,11 +113,16 @@
       editor.lsp.display-inlay-hints = true;
       editor.end-of-line-diagnostics = "hint";
       editor.inline-diagnostics.cursor-line = "warning";
-
+      editor.file-picker.hidden = false;
       keys.insert = {
         "C-[" = "normal_mode";
       };
     };
+
+    ignores = [
+      "!.gitignore"
+      "!.gitlab-ci.yml"
+    ];
 
     languages = {
       language = [{
@@ -131,27 +135,31 @@
   programs.vscode = {
     enable = true;
     package = unstable.vscode.fhs;
-    extensions = with unstable.vscode-extensions; [
-      vscodevim.vim
-      github.copilot
-      github.copilot-chat
-      github.vscode-github-actions
-      jnoortheen.nix-ide
-      rust-lang.rust-analyzer
-      tamasfe.even-better-toml
-      bradlc.vscode-tailwindcss
-      vadimcn.vscode-lldb
-    ];
+    profiles.default = {
+      
+      extensions = with unstable.vscode-extensions; [
+        vscodevim.vim
+        github.copilot
+        github.copilot-chat
+        github.vscode-github-actions
+        jnoortheen.nix-ide
+        rust-lang.rust-analyzer
+        tamasfe.even-better-toml
+        bradlc.vscode-tailwindcss
+        vadimcn.vscode-lldb
+      ];
 
-    keybindings = [
-      {
-        key = "ctrl+f";
-        command = "-workbench.action.terminal.focusFind";
-        when = "terminalFindFocused && terminalHasBeenCreated || terminalFindFocused && terminalProcessSupported || terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported";
-      }
-    ];
+      keybindings = [
+        {
+          key = "ctrl+f";
+          command = "-workbench.action.terminal.focusFind";
+          when = "terminalFindFocused && terminalHasBeenCreated || terminalFindFocused && terminalProcessSupported || terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported";
+        }
+      ];
 
-    userSettings = import ./vscode-usersettings.nix;   
+      userSettings = import ./vscode-usersettings.nix;
+    };
+
   };
 
   programs.git = {
@@ -186,6 +194,7 @@
 
   programs.zellij = {
     enable = true;
+    enableZshIntegration = true;
     attachExistingSession = true;
     settings = {
       show_startup_tips = false;
@@ -205,8 +214,15 @@
     };
   };
 
+  programs.opencode = {
+    enable = true;
+    package = unstable.opencode;
+  };
+
   home.sessionVariables = {
     # needed for rust-analyzer
     RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
   };
+
+  services.gromit-mpx.enable = true;
 }
